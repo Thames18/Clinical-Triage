@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
+
 app = FastAPI(
     title="Clinical Triage AI API",
     version="1.0.0"
