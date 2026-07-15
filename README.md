@@ -12,11 +12,11 @@ The system accepts patient information, processes it through an AI clinical reas
 
 # Current Status
 
-## Phase 1 — Foundation Setup (In Progress)
+## Phase 1 — Foundation Setup (Completed)
 
 Completed:
 
-* Next.js 14 frontend
+* Next.js 16+ frontend
 * TypeScript configuration
 * Tailwind CSS styling
 * FastAPI backend
@@ -26,15 +26,22 @@ Completed:
 * Environment configuration
 * Backend health monitoring endpoint
 
-Upcoming:
+## Phase 2 - AI Clinical Triage (Completed)
 
-* Patient intake form
-* Clinical data validation
-* LLM integration
-* Async report generation
-* Celery + Redis workers
+* Patient intake UI
+* Vitals form
+* Symptoms input
+* Backend validation models
+* AI triage prompt
+* Structured JSON response
+
+Upcoming
+
+* Celery workers
+* Redis message broker
+* Asynchronous report generation
 * PDF triage reports
-* Cloud deployment
+* Background task monitoring
 
 ---
 
@@ -44,7 +51,7 @@ Upcoming:
 
 | Technology      | Purpose           |
 | --------------- | ----------------- |
-| Next.js 14      | React framework   |
+| Next.js 16      | React framework   |
 | TypeScript      | Type safety       |
 | Tailwind CSS    | Styling           |
 | Axios           | API communication |
@@ -80,14 +87,17 @@ clinical-triage-ai/
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
+│   │   ├── components/
 │   │   └── lib/
 │   │       └── api.ts
 │   ├── Dockerfile
 │   └── package.json
+│   └── .dockerignore
 │
 ├── backend/
 │   ├── app/
 │   │   ├── api/
+│   │   ├── core/
 │   │   ├── models/
 │   │   ├── schemas/
 │   │   ├── services/
@@ -241,15 +251,6 @@ http://localhost:8000
 ---
 
 # Roadmap
-
-## Phase 2
-
-* Patient intake UI
-* Vitals form
-* Symptoms input
-* Backend validation models
-* AI triage prompt
-* Structured JSON response
 
 ## Phase 3
 
