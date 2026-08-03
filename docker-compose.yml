@@ -4,12 +4,14 @@ services:
 
   frontend:
     build: ./frontend
+
     ports:
       - "3000:3000"
+
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - /apply/.next
+      - /app/.next
 
     depends_on:
       - backend
@@ -22,3 +24,53 @@ services:
 
     volumes:
       - ./backend:/app
+
+    env_file:
+      - .env
+
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+
+    healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build:
+      context: ./backend
+
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info
+
+    volumes:
+      - ./backend:/app
+
+    env_file:
+      - .env
+
+    depends_on:
+      - backend
+      - redis
+
+  flower:
+    build:
+      context: ./backend
+
+    command: celery -A app.core.celery_app.celery_app flower --port=5555
+
+    ports:
+      - "5555:5555"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - celery_worker
+      - redis
