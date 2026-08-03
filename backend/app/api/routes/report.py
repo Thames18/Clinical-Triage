@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
-from app.workers.tasks import generate_triage_report
+from app.workers.task import generate_triage_report
 from celery.result import AsyncResult
-from app.core.celery_app import celery_app
+from app.core.celeryapp import celeryapp
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -13,12 +13,12 @@ def request_report(triage_result: dict, patient_id: str):
 
 @router.get("/status/{task_id}")
 def get_status(task_id: str):
-    result = AsyncResult(task_id, app=celery_app)
+    result = AsyncResult(task_id, app=celeryapp)
     return {"task_id": task_id, "status": result.status, "result": result.result}
 
 @router.get("/download/{task_id}")
 def download_report(task_id: str):
-    result = AsyncResult(task_id, app=celery_app)
+    result = AsyncResult(task_id, app=celeryapp)
     if result.status != "SUCCESS":
         return {"error": "Report not ready", "status": result.status}
     return FileResponse(result.result["file_path"], media_type="application/pdf")
