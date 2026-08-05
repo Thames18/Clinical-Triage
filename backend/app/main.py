@@ -3,12 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.schemas.triage import PatientInput
 from app.services.llm import analyze_patient
 from app.api.routes import report
-app.include_router(report.router)
 
 app = FastAPI(
     title="Clinical Triage AI API",
     version="1.0.0"
 )
+
+app.include_router(report.router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -7,7 +7,7 @@ celery_app = Celery(
     "clinical_triage",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.workers.tasks"],
+    include=["app.workers.task"],
 )
 
 celery_app.conf.update(
