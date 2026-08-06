@@ -13,5 +13,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
     )
 
+    JWT_SECRET_KEY: str = "change-this-in-production"
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD_HASH: str = ""
 
 settings = Settings()
