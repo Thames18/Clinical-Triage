@@ -1,273 +1,273 @@
-# Clinical-Triage
+# ClinicalTriage AI
 
-# ClinicalTriage AI 🏥🤖
-
-AI-powered clinical triage assistant that helps clinicians and students analyze patient vitals and symptoms using Large Language Models (LLMs).
-
-The system accepts patient information, processes it through an AI clinical reasoning workflow, and generates structured triage assessments with risk indicators.
+AI-powered clinical triage assistant that helps clinicians and students analyze patient vitals and symptoms using Large Language Models (LLMs). The system accepts patient information, processes it through an AI clinical reasoning workflow, generates structured triage assessments, and produces downloadable PDF reports — all behind JWT-protected endpoints, deployed to AWS with automated CI/CD.
 
 > This project is for educational and demonstration purposes only. It is not a replacement for professional medical judgment or emergency care.
 
 ---
 
-# Current Status
+## Current Status — All Phases Complete ✅
 
-## Phase 1 — Foundation Setup (Completed)
+### Phase 1 — Foundation Setup
+- Next.js 16 frontend, TypeScript, Tailwind CSS
+- FastAPI backend, REST API foundation
+- Docker + Docker Compose
+- Health monitoring endpoint
 
-Completed:
+### Phase 2 — AI Clinical Triage
+- Patient intake UI (vitals + symptoms)
+- Backend validation models (Pydantic)
+- LLM-driven triage reasoning
+- Structured JSON triage response
 
-* Next.js 16+ frontend
-* TypeScript configuration
-* Tailwind CSS styling
-* FastAPI backend
-* REST API foundation
-* Docker support
-* Docker Compose setup
-* Environment configuration
-* Backend health monitoring endpoint
+### Phase 3 — Async Reporting Infrastructure
+- Celery workers for background task processing
+- Redis as message broker + result backend
+- Asynchronous PDF triage report generation (ReportLab)
+- Flower dashboard for background task monitoring
 
-## Phase 2 - AI Clinical Triage (Completed)
-
-* Patient intake UI
-* Vitals form
-* Symptoms input
-* Backend validation models
-* AI triage prompt
-* Structured JSON response
-
-Upcoming
-
-* Celery workers
-* Redis message broker
-* Asynchronous report generation
-* PDF triage reports
-* Background task monitoring
+### Phase 4 — Production Deployment
+- JWT authentication protecting triage and report endpoints
+- AWS EC2 deployment (Docker Compose in production)
+- GitHub Actions CI/CD — auto-deploys on push to `main`
+- Background task monitoring accessible in production via Flower
 
 ---
 
-# Tech Stack
+## Tech Stack
 
-## Frontend
+### Frontend
+| Technology | Purpose |
+|---|---|
+| Next.js 16 | React framework |
+| TypeScript | Type safety |
+| Tailwind CSS | Styling |
+| Axios | API communication |
 
-| Technology      | Purpose           |
-| --------------- | ----------------- |
-| Next.js 16      | React framework   |
-| TypeScript      | Type safety       |
-| Tailwind CSS    | Styling           |
-| Axios           | API communication |
-| React Hook Form | Form management   |
-| Zod             | Validation        |
+### Backend
+| Technology | Purpose |
+|---|---|
+| FastAPI | Python API framework |
+| Pydantic | Data validation |
+| Uvicorn | ASGI server |
+| python-jose | JWT encode/decode |
+| passlib + bcrypt | Password hashing |
+
+### Async Processing
+| Technology | Purpose |
+|---|---|
+| Celery | Distributed task queue |
+| Redis | Message broker + result backend |
+| Flower | Task monitoring dashboard |
+| ReportLab | PDF generation |
+
+### Infrastructure
+| Technology | Purpose |
+|---|---|
+| Docker / Docker Compose | Containerization & orchestration |
+| AWS EC2 | Production hosting |
+| GitHub Actions | CI/CD — auto-deploy on push |
 
 ---
 
-## Backend
-
-| Technology | Purpose              |
-| ---------- | -------------------- |
-| FastAPI    | Python API framework |
-| Pydantic   | Data validation      |
-| Uvicorn    | ASGI server          |
-
----
-
-## Infrastructure
-
-| Technology     | Purpose             |
-| -------------- | ------------------- |
-| Docker         | Containerization    |
-| Docker Compose | Local orchestration |
-
----
-
-# Project Structure
+## Architecture
 
 ```
-clinical-triage-ai/
+                    ┌─────────────┐
+                    │   Frontend   │  (Next.js, :3000)
+                    └──────┬──────┘
+                           │ REST
+                    ┌──────▼──────┐
+                    │   Backend    │  (FastAPI, :8000)
+                    │  + JWT auth  │
+                    └───┬──────┬──┘
+                        │      │
+              ┌─────────▼┐   ┌▼──────────┐
+              │  Redis   │◄──┤  Celery    │
+              │  :6379   │   │  Worker    │
+              └────┬─────┘   └────────────┘
+                   │
+             ┌─────▼─────┐
+             │  Flower    │  (:5555 — task monitoring)
+             └────────────┘
+```
 
+---
+
+## Project Structure
+
+```
+Clinical-Triage/
+├── .github/workflows/
+│   └── deploy.yml              # CI/CD — deploys to EC2 on push to main
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
 │   │   ├── components/
-│   │   └── lib/
-│   │       └── api.ts
+│   │   └── lib/api.ts
 │   ├── Dockerfile
 │   └── package.json
-│   └── .dockerignore
-│
 ├── backend/
 │   ├── app/
-│   │   ├── api/
+│   │   ├── api/routes/
+│   │   │   ├── auth.py         # POST /auth/login
+│   │   │   └── report.py       # /reports/* — protected
 │   │   ├── core/
-│   │   ├── models/
+│   │   │   ├── celeryapp.py    # Celery app config
+│   │   │   ├── config.py       # Settings (env vars)
+│   │   │   ├── security.py     # JWT + password hashing
+│   │   │   └── dependency.py   # get_current_user dependency
 │   │   ├── schemas/
 │   │   ├── services/
-│   │   ├── prompts/
+│   │   │   └── llm.py          # LLM triage reasoning
 │   │   ├── workers/
+│   │   │   └── task.py         # generate_triage_report Celery task
 │   │   └── main.py
-│   │
 │   ├── Dockerfile
 │   └── requirements.txt
-│
-├── docker-compose.yml
+├── docker-compose.yml          # frontend, backend, redis, celery_worker, flower
 ├── .env.example
 └── README.md
 ```
 
 ---
 
-# Running Locally
+## Environment Variables
 
-## Requirements
-
-Install:
-
-* Node.js 20+
-* Python 3.12+
-* Docker Desktop
-* Git
-
----
-
-# Environment Variables
-
-Create your local environment file:
-
-```
+```bash
 cp .env.example .env
 ```
 
-Example:
-
 ```
-OPENAI_API_KEY= .........
-
-OR
-
-ANTHROPIC_API_KEY= ........
+OPENAI_API_KEY=...
+# or
+ANTHROPIC_API_KEY=...
 
 REDIS_URL=redis://redis:6379/0
-
 NEXT_PUBLIC_API_URL=http://localhost:8000
+
+JWT_SECRET_KEY=<generate: python -c "import secrets; print(secrets.token_hex(32))">
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD_HASH=<generate: see Authentication section below>
 ```
 
 ---
 
-# Running With Docker
+## Running With Docker (Recommended)
 
-From the project root:
-
-```
-docker compose up --build
+```bash
+docker compose up -d --build
 ```
 
-Services:
-
-Frontend:
-
-```
-http://localhost:3000
-```
-
-Backend:
-
-```
-http://localhost:8000
-```
-
-API Documentation:
-
-```
-http://localhost:8000/docs
-```
-
-Health Check:
-
-```
-http://localhost:8000/health
-```
+| Service | URL | Purpose |
+|---|---|---|
+| Frontend | http://localhost:3000 | Patient intake UI |
+| Backend | http://localhost:8000 | API |
+| API Docs | http://localhost:8000/docs | Swagger UI |
+| Health Check | http://localhost:8000/health | Liveness check |
+| Flower | http://localhost:5555 | Background task monitoring |
 
 ---
 
-# Backend API
+## Authentication
 
-## Health Endpoint
+All `/triage` and `/reports/*` endpoints require a JWT bearer token.
 
-GET
-
+**1. Generate a password hash once, locally:**
+```bash
+docker compose exec backend python -c "from passlib.context import CryptContext; print(CryptContext(schemes=['bcrypt']).hash('yourpassword'))"
 ```
-/health
+Paste the output into `ADMIN_PASSWORD_HASH` in `.env`, restart the backend.
+
+**2. Log in to get a token:**
+```bash
+curl -X POST http://localhost:8000/auth/login \
+  -d "username=admin&password=yourpassword"
 ```
-
-Response:
-
+Returns:
 ```json
-{
-  "status": "healthy"
-}
+{ "access_token": "eyJhbGciOi...", "token_type": "bearer" }
+```
+
+**3. Use the token on protected routes:**
+```bash
+curl http://localhost:8000/triage \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{ ... patient data ... }'
 ```
 
 ---
 
-# Development Without Docker
+## Backend API Reference
 
-## Frontend
+| Method | Endpoint | Auth | Purpose |
+|---|---|---|---|
+| GET | `/health` | No | Health check |
+| POST | `/auth/login` | No | Get a JWT access token |
+| POST | `/triage` | Yes | Run AI triage analysis |
+| POST | `/reports/generate` | Yes | Queue async PDF report generation |
+| GET | `/reports/status/{task_id}` | Yes | Poll Celery task status |
+| GET | `/reports/download/{task_id}` | Yes | Download completed PDF report |
 
-```
+---
+
+## Async Report Generation Flow
+
+1. `POST /reports/generate` → returns a `task_id`, work is queued to Celery via Redis
+2. Celery worker picks it up, generates the PDF with ReportLab
+3. `GET /reports/status/{task_id}` → poll until `status: "SUCCESS"`
+4. `GET /reports/download/{task_id}` → streams back the PDF
+5. Watch it happen live in Flower at `http://localhost:5555`
+
+---
+
+## Development Without Docker
+
+**Frontend**
+```bash
 cd frontend
-
 npm install
-
 npm run dev
 ```
 
-Frontend runs:
-
-```
-http://localhost:3000
-```
-
----
-
-## Backend
-
-```
+**Backend**
+```bash
 cd backend
-
 python -m venv venv
-
-source venv/bin/activate
-
+source venv/bin/activate   # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
-
 uvicorn app.main:app --reload
 ```
 
-Backend runs:
+**Celery worker** (separate terminal, from `backend/`)
+```bash
+celery -A app.core.celeryapp.celery_app worker --loglevel=info
+```
 
+**Flower** (separate terminal, from `backend/`)
+```bash
+celery -A app.core.celeryapp.celery_app flower --port=5555
 ```
-http://localhost:8000
-```
+
+> Both require a running Redis instance — `docker run -p 6379:6379 redis:7-alpine` if you don't have one locally.
 
 ---
 
-# Roadmap
+## Deployment (AWS EC2 + GitHub Actions)
 
-## Phase 3
+Production runs the same `docker-compose.yml` on an EC2 instance. Every push to `main` triggers `.github/workflows/deploy.yml`, which SSHes into the instance and redeploys automatically:
 
-* Celery workers
-* Redis queue
-* Async PDF generation
-* Report storage
+```
+git pull origin main
+docker compose down
+docker compose up -d --build
+```
 
-## Phase 4
-
-* AWS deployment
-* CI/CD pipeline
-* Production monitoring
-* Authentication
+Required GitHub Actions secrets: `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`.
 
 ---
 
-# License
+## License
 
 MIT License
