@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal, Optional
 
-
 class PatientInput(BaseModel):
 
     age: int = Field(
@@ -11,18 +10,13 @@ class PatientInput(BaseModel):
 
     sex: Literal[
         "male",
-        "female",
-        "other",
-        "unknown"
-    ] = "unknown"
-
+        "female"]
 
     temperature_c: Optional[float] = Field(
         default=None,
         ge=30,
         le=45
     )
-
 
     heart_rate: Optional[int] = Field(
         default=None,
@@ -37,13 +31,11 @@ class PatientInput(BaseModel):
         le=80
     )
 
-
     systolic_bp: Optional[int] = Field(
         default=None,
         ge=40,
         le=250
     )
-
 
     diastolic_bp: Optional[int] = Field(
         default=None,
@@ -51,13 +43,11 @@ class PatientInput(BaseModel):
         le=150
     )
 
-
     oxygen_saturation: Optional[int] = Field(
         default=None,
         ge=50,
         le=100
     )
-
 
     consciousness: Literal[
         "alert",
@@ -67,20 +57,13 @@ class PatientInput(BaseModel):
         "unknown"
     ] = "unknown"
 
-
     symptoms: list[str]
-
 
     symptom_duration_hours: Optional[int] = None
 
-
-    medical_history: list[str] = []
-
-    medications: list[str] = []
-
-    allergies: list[str] = []
-
-
+    medical_history: list[str] = Field(default_factory=list)
+    medications: list[str] = Field(default_factory=list)
+    allergies: list[str] = Field(default_factory=list)
 
 class TriageResponse(BaseModel):
 
@@ -92,7 +75,6 @@ class TriageResponse(BaseModel):
         "SELF_CARE",
         "INSUFFICIENT_INFORMATION"
     ]
-
 
     summary: str
 
