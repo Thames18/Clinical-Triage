@@ -14,6 +14,9 @@ from app.clinical.scoring import (
 from app.clinical.uncertainty import (
     calculate_uncertainty )
 
+from app.clinical.questions import (
+    generate_follow_up_questions
+)
 
 def analyze_patient(
     patient: PatientInput) -> TriageResponse:
@@ -56,7 +59,7 @@ def analyze_patient(
         triage_level = "SAME_DAY"
     else:
         triage_level = "ROUTINE"
-        
+
     # Step 6: Confidence
     # This is an engineering indicator, not a clinically validated probability.
 
@@ -95,6 +98,9 @@ def analyze_patient(
         recommendations = [
             "Routine clinical follow-up may be appropriate based on the available information."
         ]
+
+    follow_up_questions = generate_follow_up_questions(patient)
+    follow_up_questions = [ follow_up_questions(**question)  for question in follow_up_questions]
 
     return TriageResponse(
         triage_level=triage_level,
