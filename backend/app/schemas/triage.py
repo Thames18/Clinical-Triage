@@ -83,4 +83,11 @@ class TriageResponse(BaseModel):
 
     missing_information: list[str]
 
-    confidence: float
+    confidence: float = Field(
+        ge=0,
+        le=1
+    )
+
+    risk_score: int = Field(
+        ge=0
+    )
