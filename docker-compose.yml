@@ -6,7 +6,7 @@ services:
     build: ./frontend
 
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
     volumes:
       - ./frontend:/app
@@ -20,7 +20,7 @@ services:
     build: ./backend
 
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
     volumes:
       - ./backend:/app
@@ -66,7 +66,7 @@ services:
     command: celery -A app.core.celeryapp.celery_app flower --port=5555
 
     ports:
-      - "5555:5555"
+      - "127.0.0.1:5555:5555"
 
     env_file:
       - .env
