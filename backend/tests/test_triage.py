@@ -1,6 +1,6 @@
 from app.services.triage_service import analyze_patient
 from app.schemas.triage import PatientInput
-def test_low oxygen():
+def test_low_oxygen():
     patient=PatientInput(
         age=60,
         symptoms=[
