@@ -13,7 +13,7 @@ headers:{
 },
 body:JSON.stringify({
 age:45,
-sex:"unknown",
+sex:"male",
 oxygen_saturation:95,
 symptoms:[
 symptoms
