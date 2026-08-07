@@ -24,7 +24,6 @@ class PatientInput(BaseModel):
         le=250
     )
 
-
     respiratory_rate: Optional[int] = Field(
         default=None,
         ge=5,
