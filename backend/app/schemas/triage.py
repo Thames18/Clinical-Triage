@@ -1,93 +1,197 @@
-from pydantic import BaseModel, Field
-from typing import Literal, Optional
+from app.schemas.triage import (
+    PatientInput, TriageResponse
+)
 
-class PatientInput(BaseModel):
+from app.clinical.red_flags import (
+    detect_red_flags
+)
 
-    age: int = Field(
-        ge=0,
-        le=120
+from app.clinical.missing_information import (
+    detect_missing_information
+)
+
+from app.clinical.scoring import (
+    calculate_risk_score
+)
+
+from app.clinical.uncertainty import (
+    calculate_uncertainty
+)
+
+from app.clinical.interview import (
+    build_follow_up_questions
+)
+
+from app.ai.reasoning import (
+    AIReasoningService
+)
+
+from app.ai.safety_validator import (
+    validate_ai_assessment
+)
+
+
+def analyze_patient(
+    patient: PatientInput ) -> TriageResponse:
+
+    # 1. Deterministic clinical safety engine
+
+    red_flags = detect_red_flags(
+        patient
     )
 
-    sex: Literal[
-        "male",
-        "female"]
-
-    temperature_c: Optional[float] = Field(
-        default=None,
-        ge=30,
-        le=45
+    missing_information = (
+        detect_missing_information(
+            patient
+        )
     )
 
-    heart_rate: Optional[int] = Field(
-        default=None,
-        ge=20,
-        le=250
+
+    risk_score = calculate_risk_score(
+        patient,
+        red_flags
     )
 
-    respiratory_rate: Optional[int] = Field(
-        default=None,
-        ge=5,
-        le=80
+
+    uncertainty = calculate_uncertainty(
+        missing_information
     )
 
-    systolic_bp: Optional[int] = Field(
-        default=None,
-        ge=40,
-        le=250
-    )
+    # 2. Emergency override
 
-    diastolic_bp: Optional[int] = Field(
-        default=None,
-        ge=20,
-        le=150
-    )
-
-    oxygen_saturation: Optional[int] = Field(
-        default=None,
-        ge=50,
-        le=100
-    )
-
-    consciousness: Literal[
-        "alert",
-        "confused",
-        "drowsy",
-        "unresponsive",
-        "unknown"
-    ] = "unknown"
-
-    symptoms: list[str]
-
-    symptom_duration_hours: Optional[int] = None
-
-    medical_history: list[str] = Field(default_factory=list)
-    medications: list[str] = Field(default_factory=list)
-    allergies: list[str] = Field(default_factory=list)
-
-class TriageResponse(BaseModel):
-
-    triage_level: Literal[
-        "EMERGENCY",
-        "URGENT",
-        "SAME_DAY",
-        "ROUTINE",
-        "SELF_CARE",
-        "INSUFFICIENT_INFORMATION"
+    critical_flags = [
+        flag
+        for flag in red_flags
+        if flag.severity == "critical"
     ]
 
-    summary: str
+    if critical_flags:
+        return TriageResponse(
+            triage_level="EMERGENCY",
+            summary=(
+                "A critical clinical finding was detected by the deterministic safety engine."
+            ),
+            red_flags=red_flags,
+            recommendations=[
+                (
+                    "Immediate in-person clinical assessment is warranted."
+                )
+            ],
+            missing_information=missing_information,
+            follow_up_questions=[],
+            confidence=0.95,
+            risk_score=risk_score,
+            ai_assisted=False,
+        )
 
-    red_flags: list[str]
+    # 3. Ask for any important that might be missin
 
-    recommendations: list[str]
-
-    missing_information: list[str]
-
-    confidence: float = Field(
-        ge=0,
-        le=1
+    follow_up_questions = (
+        build_follow_up_questions(
+            patient
+        )
     )
 
-    risk_score: int = Field(
-        ge=0
+    if follow_up_questions:
+        return TriageResponse(
+            triage_level=(
+                "INSUFFICIENT_INFORMATION"
+            ),
+            summary=(
+                "Additional information is needed before completing the assessment."
+            ),
+            red_flags=red_flags,
+            recommendations=[
+                (
+                    "Provide the requested information and then reassess."
+                )
+            ],
+
+            missing_information=missing_information,
+            follow_up_questions=(
+                follow_up_questions
+            ),
+
+            confidence=max(
+                0.0,
+                1.0 - uncertainty,
+            ),
+
+            risk_score=risk_score,
+            ai_assisted=False,
+        )
+
+    # 4. AI reasoning
+
+    ai_service = AIReasoningService()
+    patient_data = patient.model_dump()
+    ai_assessment = ai_service.assess(
+        patient_data
+    )
+
+    # 5. AI safety validation
+
+    validation = (
+        validate_ai_assessment(
+            ai_assessment,
+            red_flags
+        )
+    )
+
+    if not validation.valid:
+        return TriageResponse(
+            triage_level=(
+                "INSUFFICIENT_INFORMATION"
+            ),
+            summary=(
+                "The AI assessment could not be validated safely."
+            ),
+            red_flags=red_flags,
+            recommendations=[
+                (
+                    "A clinician should review the available information."
+                )
+            ],
+
+            missing_information=missing_information,
+            follow_up_questions=[],
+            confidence=0.0,
+            risk_score=risk_score,
+            ai_assisted=True,
+        )
+
+    # 6. Determine final triage level
+
+    if risk_score >= 50:
+        triage_level = "URGENT"
+    elif risk_score >= 20:
+        triage_level = "SAME_DAY"
+    else:
+        triage_level = "ROUTINE"
+
+    # 7. Return combined result
+
+    final_confidence = min(
+        ai_assessment.confidence,
+        max(
+            0.0,
+            1.0 - uncertainty
+        ),
+    )
+
+    return TriageResponse(
+        triage_level=triage_level,
+        summary=ai_assessment.summary,
+        red_flags=red_flags,
+        recommendations=[
+            (
+                "Use this assessment as decision support and confirm clinically."
+            )
+        ],
+
+        missing_information=missing_information,
+        follow_up_questions=[],
+        confidence=final_confidence,
+        risk_score=risk_score,
+        ai_assisted=True
     )
