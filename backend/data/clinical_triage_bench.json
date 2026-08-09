@@ -1,0 +1,159 @@
+[
+  {
+    "case_id": "CTC-001",
+    "description": "Severe hypoxemia with respiratory symptoms",
+    "patient": {
+      "age": 72,
+      "sex": "female",
+      "temperature_c": 38.2,
+      "heart_rate": 128,
+      "respiratory_rate": 32,
+      "systolic_bp": 108,
+      "diastolic_bp": 68,
+      "oxygen_saturation": 84,
+      "consciousness": "alert",
+      "symptoms": [
+        "shortness of breath"
+      ],
+      "symptom_duration_hours": 4,
+      "medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "expected_triage": "EMERGENCY",
+    "emergency": true,
+    "expected_red_flags": [
+      "hypoxemia"
+    ],
+    "rationale": "Markedly low oxygen saturation with respiratory symptoms represents a critical finding.",
+    "tags": [
+      "respiratory",
+      "hypoxemia",
+      "emergency"
+    ]
+  },
+  {
+    "case_id": "CTB-002",
+    "description": "Altered consciousness",
+    "patient": {
+      "age": 68,
+      "sex": "male",
+      "temperature_c": 37.0,
+      "heart_rate": 104,
+      "respiratory_rate": 20,
+      "systolic_bp": 118,
+      "diastolic_bp": 74,
+      "oxygen_saturation": 96,
+      "consciousness": "unresponsive",
+      "symptoms": [
+        "confusion"
+      ],
+      "symptom_duration_hours": 1,
+      "medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "expected_triage": "EMERGENCY",
+    "emergency": true,
+    "expected_red_flags": [
+      "altered_consciousness"
+    ],
+    "rationale": "Unresponsiveness is a critical safety finding.",
+    "tags": [
+      "neurologic",
+      "consciousness",
+      "emergency"
+    ]
+  },
+  {
+    "case_id": "CTB-003",
+    "description": "Stable mild upper respiratory symptoms",
+    "patient": {
+      "age": 29,
+      "sex": "female",
+      "temperature_c": 37.4,
+      "heart_rate": 78,
+      "respiratory_rate": 16,
+      "systolic_bp": 118,
+      "diastolic_bp": 76,
+      "oxygen_saturation": 99,
+      "consciousness": "alert",
+      "symptoms": [
+        "runny nose",
+        "mild sore throat"
+      ],
+      "symptom_duration_hours": 24,
+      "medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "expected_triage": "SELF_CARE",
+    "emergency": false,
+    "expected_red_flags": [],
+    "rationale": "The synthetic case contains mild symptoms with stable vital signs and no critical findings.",
+    "tags": [
+      "respiratory",
+      "low-risk"
+    ]
+  },
+  {
+    "case_id": "CTB-004",
+    "description": "Moderate symptoms requiring prompt assessment",
+    "patient": {
+      "age": 64,
+      "sex": "male",
+      "temperature_c": 38.8,
+      "heart_rate": 112,
+      "respiratory_rate": 24,
+      "systolic_bp": 102,
+      "diastolic_bp": 64,
+      "oxygen_saturation": 92,
+      "consciousness": "alert",
+      "symptoms": [
+        "shortness of breath",
+        "fever"
+      ],
+      "symptom_duration_hours": 12,
+      "medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "expected_triage": "URGENT",
+    "emergency": false,
+    "expected_red_flags": [],
+    "rationale": "The case has multiple concerning findings but does not meet the benchmark's critical threshold.",
+    "tags": [
+      "respiratory",
+      "urgent"
+    ]
+  },
+  {
+    "case_id": "CTB-005",
+    "description": "Incomplete assessment",
+    "patient": {
+      "age": 45,
+      "sex": "female",
+      "temperature_c": null,
+      "heart_rate": null,
+      "respiratory_rate": null,
+      "systolic_bp": null,
+      "diastolic_bp": null,
+      "oxygen_saturation": null,
+      "consciousness": "unknown",
+      "symptoms": [
+        "dizziness"
+      ],
+      "symptom_duration_hours": null,
+      "medical_history": [],
+      "medications": [],
+      "allergies": []
+    },
+    "expected_triage": "INSUFFICIENT_INFORMATION",
+    "emergency": false,
+    "expected_red_flags": [],
+    "rationale": "The available information is insufficient to safely complete the assessment.",
+    "tags": [
+      "missing-data"
+    ]
+  }
+]
