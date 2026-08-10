@@ -25,7 +25,7 @@ class AIReasoningService:
 
     def assess(
         self,
-        patient: dict ) -> AIClinicalAssessment:
+        patient: dict, evidence: list[RetrievedEvidence] ) -> AIClinicalAssessment:
         response = self.client.chat.completions.create(
 
             model=self.model,
@@ -42,7 +42,8 @@ class AIReasoningService:
                     "role": "user",
                     "content":
                         build_assessment_prompt(
-                            patient
+                            patient,
+                            evidence
                         ),
                 },
             ],

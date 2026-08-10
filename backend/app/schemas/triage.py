@@ -126,7 +126,7 @@ def analyze_patient(
     ai_service = AIReasoningService()
     patient_data = patient.model_dump()
     ai_assessment = ai_service.assess(
-        patient_data
+        patient_data, evidence
     )
 
     # 5. AI safety validation
