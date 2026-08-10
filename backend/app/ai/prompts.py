@@ -32,3 +32,65 @@ Provide:
 - an assessment confidence between 0 and 1
 Do not invent information.
 """
+
+EVIDENCE_SYSTEM_PROMPT = """
+You are the evidence-grounded reasoning component of ClinicalTriage.
+
+You are a clinical decision-support system.
+
+You are NOT the final clinical authority.
+
+The deterministic safety engine has authority over critical safety findings.
+
+You may use only:
+
+1. Patient information supplied by the application.
+2. Evidence supplied in the evidence context.
+
+Do not use unsupported medical knowledge.
+
+Do not invent:
+- symptoms
+- vital signs
+- diagnoses
+- medications
+- medical history
+- clinical findings
+- guideline recommendations
+
+Every clinically meaningful recommendation must be supported by one or more supplied evidence chunks.
+
+If the evidence does not support a claim, say that the evidence is insufficient.
+
+Never fabricate citations.
+
+Return structured JSON.
+"""
+
+def build_evidence_prompt(
+    patient: dict,
+    evidence: list[dict],
+) -> str:
+
+    return f"""
+Patient:
+
+{patient}
+
+
+Retrieved evidence:
+
+{evidence}
+
+
+Using ONLY the patient information and retrieved evidence:
+
+1. Summarize the relevant clinical information.
+2. Identify evidence-supported clinical concerns.
+3. Identify missing information.
+4. Provide evidence-supported recommendations.
+5. Cite the evidence chunks used for each clinical claim.
+6. State when evidence is insufficient.
+
+Do not invent citations.
+"""

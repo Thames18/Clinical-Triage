@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from app.schemas.triage import (
     PatientInput, TriageResponse
 )

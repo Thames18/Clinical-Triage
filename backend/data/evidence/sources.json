@@ -1,0 +1,29 @@
+[
+  {
+    "source_id": "SOURCE-001",
+    "title": "American Heart Association",
+    "organization": "American Heart Association",
+    "source_type": "guideline",
+    "url": "https://www.heart.org/",
+    "publication_date": null,
+    "version": null
+  },
+  {
+    "source_id": "SOURCE-002",
+    "title": "Centers for Disease Control and Prevention",
+    "organization": "Centers for Disease Control and Prevention",
+    "source_type": "government",
+    "url": "https://www.cdc.gov/",
+    "publication_date": null,
+    "version": null
+  },
+  {
+    "source_id": "SOURCE-003",
+    "title": "World Health Organization",
+    "organization": "World Health Organization",
+    "source_type": "guideline",
+    "url": "https://www.who.int/",
+    "publication_date": null,
+    "version": null
+  }
+]
