@@ -1,37 +1,21 @@
 import math
-from app.evidence.schemas import (
-    EvidenceChunk,
-    RetrievedEvidence
-)
 
-def cosine_similarity(
-    a: list[float],
-    b: list[float]
-) -> float:
-    dot = sum(
-        x * y
-        for x, y in zip(a, b)
-    )
-    magnitude_a = math.sqrt(
-        sum(x * x for x in a)
-    )
-    magnitude_b = math.sqrt(
-        sum(x * x for x in b)
-    )
+from app.evidence.schemas import EvidenceChunk, RetrievedEvidence
 
-    if (
-        magnitude_a == 0
-        or magnitude_b == 0
-    ):
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    if len(a) != len(b):
+        raise ValueError("Embedding dimensions must match.")
+
+    dot = sum(x * y for x, y in zip(a, b))
+    magnitude_a = math.sqrt(sum(x * x for x in a))
+    magnitude_b = math.sqrt(sum(x * x for x in b))
+
+    if magnitude_a == 0 or magnitude_b == 0:
         return 0.0
 
-    return (
-        dot
-        / (
-            magnitude_a
-            * magnitude_b
-        )
-    )
+    return dot / (magnitude_a * magnitude_b)
+
 
 class EvidenceRetriever:
     def __init__(
@@ -45,32 +29,22 @@ class EvidenceRetriever:
     def retrieve(
         self,
         query_embedding: list[float],
-        top_k: int = 5
+        top_k: int = 5,
     ) -> list[RetrievedEvidence]:
+        if top_k <= 0:
+            return []
 
-        scored = []
+        scored: list[tuple[float, EvidenceChunk]] = []
+
         for chunk in self.chunks:
-            embedding = (
-                self.embeddings.get(
-                    chunk.chunk_id
-                )
-            )
+            embedding = self.embeddings.get(chunk.chunk_id)
             if embedding is None:
                 continue
-            score = cosine_similarity(
-                query_embedding,
-                embedding,
-            )
-            scored.append(
-                (
-                    score,
-                    chunk,
-                )
-            )
-        scored.sort(
-            key=lambda item: item[0],
-            reverse=True,
-        )
+
+            score = cosine_similarity(query_embedding, embedding)
+            scored.append((score, chunk))
+
+        scored.sort(key=lambda item: item[0], reverse=True)
 
         return [
             RetrievedEvidence(
@@ -82,7 +56,5 @@ class EvidenceRetriever:
                 relevance_score=score,
                 section=chunk.section,
             )
-
-            for score, chunk
-            in scored[:top_k]
+            for score, chunk in scored[:top_k]
         ]

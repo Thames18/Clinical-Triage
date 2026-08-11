@@ -4,6 +4,7 @@ from app.services.triage_service import analyze_patient
 def test_critical_red_flag_overrides_missing_information():
     patient = PatientInput(
         age=65,
+        sex="male", 
         symptoms=[
             "shortness of breath"
         ],
@@ -23,6 +24,7 @@ def test_missing_information_is_reported():
 
     patient = PatientInput(
         age=30,
+        sex="female",   
         symptoms=[
             "headache"
         ],
@@ -38,6 +40,7 @@ def test_high_heart_rate_is_emergency():
 
     patient = PatientInput(
         age=40,
+        sex="male",
         symptoms=[
             "palpitations"
         ],

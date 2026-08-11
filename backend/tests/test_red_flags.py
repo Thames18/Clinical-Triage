@@ -5,6 +5,7 @@ def test_low_oxygen_is_critical():
 
     patient = PatientInput(
         age=60,
+        sex="female",
         symptoms=["shortness of breath"],
         oxygen_saturation=85,
     )
@@ -17,6 +18,7 @@ def test_low_oxygen_is_critical():
 def test_severe_tachycardia():
     patient = PatientInput(
         age=45,
+        sex="male",
         symptoms=["palpitations"],
         heart_rate=160,
     )
@@ -30,6 +32,7 @@ def test_severe_tachycardia():
 def test_altered_mental_status():
     patient = PatientInput(
         age=70,
+        sex="female",
         symptoms=["confusion"],
         consciousness="confused",
     )

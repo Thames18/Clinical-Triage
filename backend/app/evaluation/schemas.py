@@ -7,7 +7,8 @@ TriageLevel = Literal[
     "SAME_DAY",
     "ROUTINE",
     "SELF_CARE",
-    "INSUFFICIENT_INFORMATION"
+    "INSUFFICIENT_INFORMATION",
+    "ASSESSMENT_UNAVAILABLE"
 ]
 
 class BenchmarkCase(BaseModel):
