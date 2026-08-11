@@ -45,7 +45,7 @@ The original prototype validated the core idea: patient intake → AI reasoning 
 
 ---
 
-## 🚀 Production Phase (Active)
+## Production Phase (Active)
 
 Full rebuild plan to take ClinicalTriage AI from demo to a real, safety-checked, evaluated product.
 
@@ -54,11 +54,11 @@ Full rebuild plan to take ClinicalTriage AI from demo to a real, safety-checked,
 | Phase | Focus | Status |
 |---|---|---|
 | Phase 1 | Make the current prototype real | Done |
-| **Phase 2** | **Clinical safety** | 🔄 **In progress** |
-| Phase 3 | Better AI | ⏳ Upcoming |
-| Phase 4 | Evaluation | ⏳ Upcoming |
-| Phase 5 | Product | ⏳ Upcoming |
-| Phase 6 | Serious engineering | ⏳ Upcoming |
+| **Phase 2** | **Clinical safety** |  |
+| Phase 3 | Better AI | Done |
+| Phase 4 | Evaluation | Done |
+| Phase 5 | Product | Done |
+| Phase 6 | Serious engineering | 🔄 **In progress** |
 
 ### Phase 1 — Make the current prototype real (Week 1)
 - [x] Proper intake UI
@@ -70,7 +70,7 @@ Full rebuild plan to take ClinicalTriage AI from demo to a real, safety-checked,
 - [x] Validation
 - [x] Loading/error states
 
-### Phase 2 — Clinical safety (Week 2) — *current*
+### Phase 2 — Clinical safety (Week 2) 
 - [x] Deterministic red flags
 - [x] Vital-sign validation
 - [x] Emergency override
@@ -79,27 +79,27 @@ Full rebuild plan to take ClinicalTriage AI from demo to a real, safety-checked,
 - [x] Uncertainty handling
 
 ### Phase 3 — Better AI (Week 3)
-- [ ] Structured output schema
-- [ ] Better prompts
-- [ ] Clinical reasoning layer
-- [ ] Evidence retrieval
-- [ ] Citations
-- [ ] Safety validator
+- [x] Structured output schema
+- [x] Better prompts
+- [x] Clinical reasoning layer
+- [x] Evidence retrieval
+- [x] Citations
+- [x] Safety validator
 
 ### Phase 4 — Evaluation (Week 4)
-- [ ] 100–500 synthetic cases
-- [ ] Emergency cases
-- [ ] Ambiguous cases
-- [ ] Adversarial cases
-- [ ] Sensitivity/specificity analysis
-- [ ] False-negative analysis
-- [ ] Regression testing
+- [x] 100–500 synthetic cases
+- [x] Emergency cases
+- [x] Ambiguous cases
+- [x] Adversarial cases
+- [x] Sensitivity/specificity analysis
+- [x] False-negative analysis
+- [x] Regression testing
 
 ### Phase 5 — Product (Week 5)
-- [ ] Polished dashboard
-- [ ] History
-- [ ] Reports
-- [ ] PDF export
+- [x] Polished dashboard
+- [x] History
+- [x] Reports
+- [x] PDF export
 - [ ] Student mode
 - [ ] Scenario simulator
 - [ ] Explanations
