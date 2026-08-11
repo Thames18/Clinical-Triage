@@ -1,0 +1,212 @@
+---
+ .env.example                            | 19 ++++++
+ backend/Dockerfile                      |  6 ++
+ backend/app/api/routes/auth.py          | 31 ++++++++-
+ backend/app/core/config.py              | 27 ++++++++
+ backend/app/core/dependency.py          | 20 ++++++
+ backend/app/core/user_store.py          | 42 +++++++++++-
+ backend/app/schemas/auth.py             | 13 +++-
+ backend/tests/test_auth.py              | 87 +++++++++++++++++++++++++
+ frontend/src/components/PatientForm.tsx | 44 +++++++++----
+ frontend/src/lib/api.ts                 | 24 +++++++
+ 10 files changed, 294 insertions(+), 19 deletions(-)
+ create mode 100644 backend/tests/test_auth.py
+
+diff --git a/.env.example b/.env.example
+index ac582d1..7651392 100644
+--- a/.env.example
++++ b/.env.example
+@@ -8,3 +8,22 @@ REDIS_URL=redis://redis:6379/0
+ # Frontend API Connection
+ NEXT_PUBLIC_API_URL=http://localhost:8000
+ 
++# Deployment mode. Set to "production" on the real server — this activates
++# strict startup checks on JWT_SECRET_KEY and ADMIN_PASSWORD_HASH below.
++ENVIRONMENT=development
++
++# Auth
++# Generate with: python -c "import secrets; print(secrets.token_urlsafe(48))"
++# Required (32+ random chars) when ENVIRONMENT=production, or the app will
++# refuse to start.
++JWT_SECRET_KEY=change-this-in-production
++
++# Administrator login. Generate the hash with:
++# python -c "from passlib.context import CryptContext; print(CryptContext(schemes=['bcrypt']).hash('your-password'))"
++ADMIN_USERNAME=admin
++ADMIN_PASSWORD_HASH=
++
++# Path (inside the container) to the SQLite user database. Must live under
++# the mounted clinical_triage_data volume so it survives redeploys.
++CLINICAL_TRIAGE_DB_PATH=data/clinical_triage.db
++
+diff --git a/backend/Dockerfile b/backend/Dockerfile
+index 6de4317..6217277 100644
+--- a/backend/Dockerfile
++++ b/backend/Dockerfile
+@@ -8,6 +8,12 @@ RUN pip install --no-cache-dir -r requirements.txt
+ 
+ COPY . .
+ 
++RUN groupadd --system app && useradd --system --gid app --home /app app \
++    && mkdir -p /app/data \
++    && chown -R app:app /app
++
++USER app
++
+ EXPOSE 8000
+ 
+ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+\ No newline at end of file
+diff --git a/backend/app/api/routes/auth.py b/backend/app/api/routes/auth.py
+index 77654dc..d74780e 100644
+--- a/backend/app/api/routes/auth.py
++++ b/backend/app/api/routes/auth.py
+@@ -2,9 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
+ from fastapi.security import OAuth2PasswordRequestForm
+ 
+ from app.core.config import settings
++from app.core.dependency import get_current_user
+ from app.core.security import create_access_token, verify_password
+-from app.core.user_store import create_user, initialize_user_store, verify_user
+-from app.schemas.auth import RegistrationRequest, RegistrationResponse
++from app.core.user_store import create_user, get_user, initialize_user_store, verify_user
++from app.schemas.auth import (
++    CurrentUserResponse,
++    LogoutResponse,
++    RegistrationRequest,
++    RegistrationResponse,
++)
+ 
+ router = APIRouter(prefix="/auth", tags=["auth"])
+ 
+@@ -43,3 +49,24 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
+ 
+     token = create_access_token(subject=username)
+     return {"access_token": token, "token_type": "bearer"}
++
++
++@router.get("/me", response_model=CurrentUserResponse)
++def me(username: str = Depends(get_current_user)):
++    """Lets the frontend confirm a stored token is still valid (e.g. after a
++    refresh or new tab) instead of guessing based on a locally cached value.
++    """
++    if username == settings.ADMIN_USERNAME:
++        return {"username": username, "role": "admin"}
++
++    user = get_user(username)
++    return {"username": username, "role": user["role"] if user else "user"}
++
++
++@router.post("/logout", response_model=LogoutResponse)
++def logout(username: str = Depends(get_current_user)):
++    # Access tokens are stateless JWTs, so there is no server-side session to
++    # revoke here — the client is responsible for discarding the token. This
++    # endpoint exists for a consistent contract (and a place to log the event
++    # or blocklist the token if that's added later).
++    return {"message": "Logged out successfully"}
+diff --git a/backend/app/core/config.py b/backend/app/core/config.py
+index 8e24fba..2560b19 100644
+--- a/backend/app/core/config.py
++++ b/backend/app/core/config.py
+@@ -1,7 +1,13 @@
++from pydantic import model_validator
+ from pydantic_settings import BaseSettings, SettingsConfigDict
+ 
++INSECURE_JWT_SECRETS = {"", "change-this-in-production", "secret", "changeme", "supersecret"}
++MIN_JWT_SECRET_LENGTH = 32
++
+ 
+ class Settings(BaseSettings):
++    ENVIRONMENT: str = "development"
++
+     OPENAI_API_KEY: str = ""
+     ANTHROPIC_API_KEY: str = ""
+ 
+@@ -18,4 +24,25 @@ class Settings(BaseSettings):
+         env_file_encoding="utf-8",
+     )
+ 
++    @model_validator(mode="after")
++    def _require_secure_secrets_in_production(self) -> "Settings":
++        if self.ENVIRONMENT.lower() != "production":
++            return self
++
++        if (
++            self.JWT_SECRET_KEY in INSECURE_JWT_SECRETS
++            or len(self.JWT_SECRET_KEY) < MIN_JWT_SECRET_LENGTH
++        ):
++            raise ValueError(
++                "JWT_SECRET_KEY must be a strong random secret of at least "
++                f"{MIN_JWT_SECRET_LENGTH} characters when ENVIRONMENT=production. "
++                'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(48))"'
++            )
++
++        if not self.ADMIN_PASSWORD_HASH:
++            raise ValueError("ADMIN_PASSWORD_HASH must be set when ENVIRONMENT=production.")
++
++        return self
++
++
+ settings = Settings()
+diff --git a/backend/app/core/dependency.py b/backend/app/core/dependency.py
+index 51fd368..c56926f 100644
+--- a/backend/app/core/dependency.py
++++ b/backend/app/core/dependency.py
+@@ -1,10 +1,18 @@
+ from fastapi import Depends, HTTPException, status
+ from fastapi.security import OAuth2PasswordBearer
++
++from app.core.config import settings
+ from app.core.security import decode_access_token
++from app.core.user_store import get_user
+ 
+ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+ 
++
+ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
++    """Validate the JWT signature/expiry, then confirm the account it names
++    still exists and is active. A valid signature only proves the token was
++    issued by this app; it does not prove the account is still real.
++    """
+     username = decode_access_token(token)
+     if username is None:
+         raise HTTPException(
+@@ -12,4 +20,16 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
+             detail="Invalid or expired token",
+             headers={"WWW-Authenticate": "Bearer"},
+         )
++
++    if username == settings.ADMIN_USERNAME:
++        return username
++
++    user = get_user(username)
++    if user is None or not user["is_active"]:
++        raise HTTPException(
++            status_code=status.HTTP_401_UNAUTHORIZED,
++            detail="Account is no longer active",
++            headers={"WWW-Authenticate": "Bearer"},
++        )
++
+     return username
+\ No newline at end of file
+diff --git a/backend/app/core/user_store.py b/backend/app/core/user_store.py
+index fe6256f..a2f23ae 100644
+--- a/backend/app/core/user_store.py
++++ b/backend/app/core/user_store.py
+@@ -32,10 +32,22 @@ def initialize_user_store() -> None:
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                 password_hash TEXT NOT NULL,
++                role TEXT NOT NULL DEFAULT 'user',
++                is_active INTEGER NOT NULL DEFAULT 1,
+                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+             )
+             """
+         )
++        # Backfill columns for databases created before role/is_active existed.
++        existing_columns = {
++            row[1] for row in connection.execute("PRAGMA table_info(users)").fetchall()
++        }
++        if "role" not in existing_columns:
++            connection.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
++      

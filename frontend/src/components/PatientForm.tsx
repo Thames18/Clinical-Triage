@@ -207,6 +207,7 @@ export default function PatientForm() {
     }
   }
 
+  /* Secure access temporarily disabled — login/sign-in gate commented out.
   if (!token) {
     return (
       <section className="card login-card">
@@ -256,6 +257,7 @@ export default function PatientForm() {
       </section>
     );
   }
+  */
 
   return (
     <div className="dashboard-grid">
