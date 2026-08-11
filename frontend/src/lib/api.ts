@@ -1,7 +1,43 @@
 import axios from "axios";
 
+const TOKEN_KEY = "clinical_triage_access_token";
+
 export const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(TOKEN_KEY);
+}
+
+export function storeToken(token: string) {
+  window.sessionStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearStoredToken() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(TOKEN_KEY);
+}
+
+export async function login(username: string, password: string): Promise<string> {
+  const body = new URLSearchParams();
+  body.set("username", username);
+  body.set("password", password);
+
+  const response = await api.post<{ access_token: string; token_type: string }>(
+    "/auth/login",
+    body,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    },
+  );
+
+  storeToken(response.data.access_token);
+  return response.data.access_token;
+}

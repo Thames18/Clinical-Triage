@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clinical Triage AI",
-  description: "Clinical Triage AI is a safety-first clinical assessment assistant that helps healthcare professionals triage patients based on their symptoms and vital signs.",
+  title: "ClinicalTriage AI",
+  description:
+    "Safety-first clinical triage decision-support interface with deterministic safety checks and evidence-grounded AI reasoning.",
 };
 
 export default function RootLayout({
@@ -23,11 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
