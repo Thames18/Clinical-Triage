@@ -4,7 +4,8 @@ services:
 
   frontend:
     build: ./frontend
-
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api.triage.mustafalsalem.com
     ports:
       - "127.0.0.1:3000:3000"
 
