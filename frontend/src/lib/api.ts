@@ -1,14 +1,14 @@
 import axios from "axios";
 
-const TOKEN_KEY = "clinical_triage_access_token";
-
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 60000, 
 });
-
+ /* temporary no longer needed to login for triage, but will be needed for other endpoints in the future 
+const TOKEN_KEY = "auth_token";
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
   return window.sessionStorage.getItem(TOKEN_KEY);
@@ -41,3 +41,4 @@ export async function login(username: string, password: string): Promise<string>
   storeToken(response.data.access_token);
   return response.data.access_token;
 }
+ */

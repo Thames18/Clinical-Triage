@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, /*useEffect ,*/ useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -9,7 +9,8 @@ import {
   LogOut,
   ShieldCheck,
 } from "lucide-react";
-import { api, getStoredToken, login, clearStoredToken } from "@/lib/api";
+import {api} from "@/lib/api";
+ /*import { api, getStoredToken, login, clearStoredToken } from "@/lib/api";  */
 
 type TriageResult = {
   assessment_id?: string;
@@ -95,18 +96,18 @@ function levelClass(level: string) {
 }
 
 export default function PatientForm() {
-  const [token, setToken] = useState<string | null>(null);
+/*  const [token, setToken] = useState<string | null>(null);*/
   const [form, setForm] = useState(initialForm);
-  const [loginState, setLoginState] = useState({ username: "", password: "" });
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+/*  const [loginState, setLoginState] = useState({ username: "", password: "" }); */
+/*  const [loginLoading, setLoginLoading] = useState(false); */
+/*  const [loginError, setLoginError] = useState(""); */
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<TriageResult | null>(null);
 
-  useEffect(() => {
-    setToken(getStoredToken());
-  }, []);
+/*  useEffect(() => {
+     setToken(getStoredToken()); 
+  }, []);*/
 
   const hasResult = Boolean(result);
   const confidence = useMemo(
@@ -118,7 +119,7 @@ export default function PatientForm() {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+/*  async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoginLoading(true);
     setLoginError("");
@@ -137,7 +138,7 @@ export default function PatientForm() {
     clearStoredToken();
     setToken(null);
     setResult(null);
-  }
+  } */
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -183,9 +184,11 @@ export default function PatientForm() {
     };
 
     try {
-      const response = await api.post<TriageResult>("/triage", payload, {
+ /* no longer needed      const response = await api.post<TriageResult>("/triage", payload, {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      });*/
+      const response = await api.post<TriageResult>(
+          "/triage",  payload );
       setResult(response.data);
     } catch (err) {
       const status =
@@ -193,7 +196,7 @@ export default function PatientForm() {
           ? (err as { response?: { status?: number } }).response?.status
           : undefined;
 
-      if (status === 401) {
+/* 401 error no longer needed     if (status === 401) {
         clearStoredToken();
         setToken(null);
         setError("Your session expired. Please sign in again.");
@@ -201,7 +204,10 @@ export default function PatientForm() {
         setError(
           "The assessment could not be completed. Check the API connection and try again.",
         );
-      }
+      }*/
+      setError(
+        "The assessment could not be completed. Check the API connection and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -263,16 +269,10 @@ export default function PatientForm() {
     <div className="dashboard-grid">
       <section className="card">
         <div className="card-header">
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-            <div>
+          <div>
               <h2>Patient assessment</h2>
               <p>Provide the information currently available. Optional vitals can be left blank.</p>
             </div>
-            <button className="secondary-button" type="button" onClick={logout}>
-              <LogOut size={14} style={{ verticalAlign: "middle", marginRight: 6 }} />
-              Sign out
-            </button>
-          </div>
         </div>
 
         <form className="form-body" onSubmit={submit}>
