@@ -9,12 +9,24 @@ def test_public_health_and_version():
     assert response.status_code == 200
     assert "app_version" in response.json()
 
-def test_triage_requires_authentication():
+def test_triage_does_not_require_authentication():
     client = TestClient(app)
+
     response = client.post("/triage", json={
-        "age": 60, "sex": "male", "symptoms": ["shortness of breath"], "oxygen_saturation": 84
+        "age": 60,
+        "sex": "male",
+        "symptoms": ["shortness of breath"],
+        "oxygen_saturation": 84,
     })
-    assert response.status_code == 401
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "triage_level" in data
+    assert "summary" in data
+    assert "risk_score" in data
+    assert "confidence" in data
 
 def test_authenticated_emergency_path():
     app.dependency_overrides[get_current_user] = lambda: "test-user"
