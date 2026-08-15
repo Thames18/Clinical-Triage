@@ -100,18 +100,18 @@ Full rebuild plan to take ClinicalTriage AI from demo to a real, safety-checked,
 - [x] History
 - [x] Reports
 - [x] PDF export
-- [ ] Student mode
-- [ ] Scenario simulator
-- [ ] Explanations
+- [x] Student mode
+- [x] Scenario simulator
+- [x] Explanations
 
 ### Phase 6 — Serious engineering (Week 6+)
-- [ ] Audit logging
-- [ ] FHIR compatibility
-- [ ] Monitoring
-- [ ] Model/version tracking
+- [x] Audit logging
+- [x] FHIR compatibility
+- [x] Monitoring
+- [x] Model/version tracking
 - [ ] Security hardening
-- [ ] Deployment pipeline
-- [ ] CI/CD
+- [x] Deployment pipeline
+- [x] CI/CD
 
 
 ---
@@ -179,6 +179,9 @@ clinical-triage-ai/
 ├── .env.example
 └── README.md
 ```
+
+## Out of Scope (Security)
+Since this will be used with the same staff it was opted out the security (Login/ Log out) it wont be needed for now
 
 ---
 
